@@ -53,10 +53,12 @@ jobs:
 
       # --- 4. DEPLOY TO AMAZON ECS ---
       
-      # Step A: Download your current task setup from AWS
+      # Step A: Download your current task setup from AWS and clean it
       - name: Download task definition
         run: |
           aws ecs describe-task-definition --task-definition multi-ai-agent-task --query taskDefinition > task-definition.json
+          # NEW LINE: Delete the incompatible 'enableFaultInjection' key that AWS recently added
+          jq 'del(.enableFaultInjection)' task-definition.json > temp.json && mv temp.json task-definition.json
 
       # Step B: Insert the brand new Docker image into that setup
       - name: Fill in the new image ID in the Amazon ECS task definition
@@ -67,7 +69,7 @@ jobs:
           container-name: multi-ai-agent-container
           image: ${{ steps.build-image.outputs.image }}
 
-      # Step C: The snippet you shared! This tells AWS to restart the servers with the new image
+      # Step C: Tell AWS to restart the servers with the new image
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
