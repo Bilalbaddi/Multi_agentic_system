@@ -1,0 +1,20 @@
+name: Build and Deploy Multi-AI Agent
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # Docker is already installed here!
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # You skip the installation and go straight to building your app
+      - name: Build the AI Agent Docker Image
+        run: docker build -t multi-ai-agent:latest .
+        
+      - name: Check the built image
+        run: docker images
