@@ -5,14 +5,23 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest # Docker is already installed here!
+  build-and-scan:
+    runs-on: ubuntu-latest
     
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          # SonarCloud needs the full history to see what code is "new"
+          fetch-depth: 0 
 
-      # You skip the installation and go straight to building your app
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # GitHub automatically provides this
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
       - name: Build the AI Agent Docker Image
         run: docker build -t multi-ai-agent:latest .
         
